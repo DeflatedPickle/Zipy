@@ -63,6 +63,7 @@ class Window(tk.Tk):
         self.clear()
         with zipfile.ZipFile(file, "r") as z:
             previous_folder = ""
+            text = ""
             for item in z.infolist():
                 # print(item)
                 if "/" in item.filename:
@@ -74,53 +75,36 @@ class Window(tk.Tk):
                         previous_folder = os.path.splitext(item.filename.split("/")[-2])[0]
                     except _tkinter.TclError:
                         pass
-
-                    self.widget_treeview.insert(parent=os.path.splitext(item.filename.split("/")[-2])[0],
-                                                index="end",
-                                                iid=os.path.splitext(item.filename)[0],
-                                                text=os.path.splitext(item.filename.split("/")[-1])[0],
-                                                values=[os.path.splitext(item.filename)[1],
-                                                        "{0[2]}/{0[1]}/{0[0]} {0[5]}:{0[4]}:{0[3]}".format(item.date_time),
-                                                        "",
-                                                        item.compress_type,
-                                                        item.comment,
-                                                        item.extra,
-                                                        item.create_system,
-                                                        item.create_version,
-                                                        item.extract_version,
-                                                        item.reserved,
-                                                        item.flag_bits,
-                                                        item.volume,
-                                                        item.internal_attr,
-                                                        item.external_attr,
-                                                        item.header_offset,
-                                                        item.CRC,
-                                                        item.compress_size,
-                                                        item.file_size])
+                    text = os.path.splitext(item.filename.split("/")[-1])[0]
+                    self.add_item(item, previous_folder, text)
                 if "/" not in item.filename:
-                    self.widget_treeview.insert(parent="",
-                                                index="end",
-                                                iid=os.path.splitext(item.filename)[0],
-                                                text=os.path.splitext(item.filename)[0],
-                                                values=[os.path.splitext(item.filename)[1],
-                                                        "{0[2]}/{0[1]}/{0[0]} {0[5]}:{0[4]}:{0[3]}".format(item.date_time),
-                                                        "",
-                                                        item.compress_type,
-                                                        item.comment,
-                                                        item.extra,
-                                                        item.create_system,
-                                                        item.create_version,
-                                                        item.extract_version,
-                                                        item.reserved,
-                                                        item.flag_bits,
-                                                        item.volume,
-                                                        item.internal_attr,
-                                                        item.external_attr,
-                                                        item.header_offset,
-                                                        item.CRC,
-                                                        item.compress_size,
-                                                        item.file_size])
                     previous_folder = ""
+                    text = os.path.splitext(item.filename)[0]
+                    self.add_item(item, previous_folder, text)
+
+    def add_item(self, item, parent, text):
+        self.widget_treeview.insert(parent=parent,
+                                    index="end",
+                                    iid=os.path.splitext(item.filename)[0],
+                                    text=text,
+                                    values=[os.path.splitext(item.filename)[1],
+                                            "{0[2]}/{0[1]}/{0[0]} {0[5]}:{0[4]}:{0[3]}".format(item.date_time),
+                                            "",
+                                            item.compress_type,
+                                            item.comment,
+                                            item.extra,
+                                            item.create_system,
+                                            item.create_version,
+                                            item.extract_version,
+                                            item.reserved,
+                                            item.flag_bits,
+                                            item.volume,
+                                            item.internal_attr,
+                                            item.external_attr,
+                                            item.header_offset,
+                                            item.CRC,
+                                            item.compress_size,
+                                            item.file_size])
 
     def exit_program(self):
         raise SystemExit
