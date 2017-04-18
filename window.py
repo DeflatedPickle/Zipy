@@ -14,6 +14,7 @@ __title__ = "Zipy"
 __author__ = "DeflatedPickle"
 __version__ = "1.0.0"
 
+
 # http://www.rarlab.com
 # http://www.7-zip.org
 # http://www.winzip.com/index.html
@@ -41,6 +42,13 @@ class Window(tk.Tk):
 
         self.widget_treeview = Treeview(self.frame_treeview)
         self.widget_treeview.grid(row=0, column=0, sticky="nesw")
+        self.widget_treeview["displaycolumns"] = ("File Extension",
+                                                  "Date Modified",
+                                                  "File Type",
+                                                  "Compress Size",
+                                                  "File Size",
+                                                  "Filler")
+        # print(self.widget_treeview["displaycolumns"])
 
         self.widget_scrollbar_horizontal = ttk.Scrollbar(self.frame_treeview, orient="horizontal",
                                                          command=self.widget_treeview.xview)
@@ -61,26 +69,29 @@ class Window(tk.Tk):
 
     def open_file(self, file):
         self.clear()
-        with zipfile.ZipFile(file, "r") as z:
-            previous_folder = ""
-            text = ""
-            for item in z.infolist():
-                # print(item)
-                if "/" in item.filename:
-                    try:
-                        self.widget_treeview.insert(parent=previous_folder,
-                                                    index="end",
-                                                    iid=os.path.splitext(item.filename.split("/")[-2])[0],
-                                                    text=os.path.splitext(item.filename.split("/")[-2])[0])
-                        previous_folder = os.path.splitext(item.filename.split("/")[-2])[0]
-                    except _tkinter.TclError:
-                        pass
-                    text = os.path.splitext(item.filename.split("/")[-1])[0]
-                    self.add_item(item, previous_folder, text)
-                if "/" not in item.filename:
-                    previous_folder = ""
-                    text = os.path.splitext(item.filename)[0]
-                    self.add_item(item, previous_folder, text)
+        try:
+            with zipfile.ZipFile(file, "r") as z:
+                previous_folder = ""
+                text = ""
+                for item in z.infolist():
+                    # print(item)
+                    if "/" in item.filename:
+                        try:
+                            self.widget_treeview.insert(parent=previous_folder,
+                                                        index="end",
+                                                        iid=os.path.splitext(item.filename.split("/")[-2])[0],
+                                                        text=os.path.splitext(item.filename.split("/")[-2])[0])
+                            previous_folder = os.path.splitext(item.filename.split("/")[-2])[0]
+                        except _tkinter.TclError:
+                            pass
+                        text = os.path.splitext(item.filename.split("/")[-1])[0]
+                        self.add_item(item, previous_folder, text)
+                    if "/" not in item.filename:
+                        previous_folder = ""
+                        text = os.path.splitext(item.filename)[0]
+                        self.add_item(item, previous_folder, text)
+        except FileNotFoundError:
+            print("'{}' does not exist.".format(file))
 
     def add_item(self, item, parent, text):
         self.widget_treeview.insert(parent=parent,
@@ -118,7 +129,7 @@ class Menu(tk.Menu):
 
         self.init_menu_application()
         self.init_menu_view()
-        #self.init_menu_columns()
+        self.init_menu_columns()
         self.init_menu_window()
         self.init_menu_help()
         self.init_menu_system()
@@ -144,10 +155,87 @@ class Menu(tk.Menu):
 
     def init_menu_columns(self):
         self.menu_columns = tk.Menu(self.menu_view)
-        self.list_selected = ["File Extension", "Date Modified", "File Type", "Compress Size", "File Size", "Filler"]
+        self.columns_default = ["File Extension", "Date Modified", "File Type", "Compress Size", "File Size", "Filler"]
 
-        for item in self.parent.widget_treeview["columns"]:
-            self.menu_columns.add_checkbutton(label=item,)
+        # for item in self.parent.widget_treeview["columns"]:
+        #     self.menu_columns.add_checkbutton(label=item, variable=tk.BooleanVar())
+
+        # TO DO: Replace menu items below with a for loop to save lines.
+        self.boolean_variable_file_extension = tk.BooleanVar()
+        self.boolean_variable_file_extension.set(True)
+        self.menu_columns.add_checkbutton(label="File Extension", variable=self.boolean_variable_file_extension, command=lambda: self.toggle_column(self.boolean_variable_file_extension, 0, "File Extension"))
+
+        self.boolean_variable_date_modified = tk.BooleanVar()
+        self.boolean_variable_date_modified.set(True)
+        self.menu_columns.add_checkbutton(label="Date Modified", variable=self.boolean_variable_date_modified, command=lambda: self.toggle_column(self.boolean_variable_date_modified, 1, "Date Modified"))
+
+        self.boolean_variable_file_type = tk.BooleanVar()
+        self.boolean_variable_file_type.set(True)
+        self.menu_columns.add_checkbutton(label="File Type", variable=self.boolean_variable_file_type, command=lambda: self.toggle_column(self.boolean_variable_file_type, 2, "File Type"))
+
+        self.boolean_variable_compress_type = tk.BooleanVar()
+        self.boolean_variable_compress_type.set(False)
+        self.menu_columns.add_checkbutton(label="Compress Type", variable=self.boolean_variable_compress_type, command=lambda: self.toggle_column(self.boolean_variable_compress_type, 3, "Compress Type"))
+
+        self.boolean_variable_comment = tk.BooleanVar()
+        self.boolean_variable_comment.set(False)
+        self.menu_columns.add_checkbutton(label="Comment", variable=self.boolean_variable_comment, command=lambda: self.toggle_column(self.boolean_variable_comment, 4, "Comment"))
+
+        self.boolean_variable_extra = tk.BooleanVar()
+        self.boolean_variable_extra.set(False)
+        self.menu_columns.add_checkbutton(label="Comment", variable=self.boolean_variable_extra, command=lambda: self.toggle_column(self.boolean_variable_extra, 5, "Extra"))
+
+        self.boolean_variable_create_system = tk.BooleanVar()
+        self.boolean_variable_create_system.set(False)
+        self.menu_columns.add_checkbutton(label="Create System", variable=self.boolean_variable_create_system, command=lambda: self.toggle_column(self.boolean_variable_create_system, 6, "Create System"))
+
+        self.boolean_variable_create_version = tk.BooleanVar()
+        self.boolean_variable_create_version.set(False)
+        self.menu_columns.add_checkbutton(label="Create Version", variable=self.boolean_variable_create_version, command=lambda: self.toggle_column(self.boolean_variable_create_version, 7, "Create Version"))
+
+        self.boolean_variable_extract_version = tk.BooleanVar()
+        self.boolean_variable_extract_version.set(False)
+        self.menu_columns.add_checkbutton(label="Extract Version", variable=self.boolean_variable_extract_version, command=lambda: self.toggle_column(self.boolean_variable_extract_version, 8, "Extract Version"))
+
+        self.boolean_variable_reserved = tk.BooleanVar()
+        self.boolean_variable_reserved.set(False)
+        self.menu_columns.add_checkbutton(label="Reserved", variable=self.boolean_variable_reserved, command=lambda: self.toggle_column(self.boolean_variable_reserved, 9, "Reserved"))
+
+        self.boolean_variable_flag_bits = tk.BooleanVar()
+        self.boolean_variable_flag_bits.set(False)
+        self.menu_columns.add_checkbutton(label="Flag Bits", variable=self.boolean_variable_flag_bits, command=lambda: self.toggle_column(self.boolean_variable_flag_bits, 10, "Flag Bits"))
+
+        self.boolean_variable_volume = tk.BooleanVar()
+        self.boolean_variable_volume.set(False)
+        self.menu_columns.add_checkbutton(label="Volume", variable=self.boolean_variable_volume, command=lambda: self.toggle_column(self.boolean_variable_volume, 11, "Volume"))
+
+        self.boolean_variable_internal_attr = tk.BooleanVar()
+        self.boolean_variable_internal_attr.set(False)
+        self.menu_columns.add_checkbutton(label="Internal Attr", variable=self.boolean_variable_internal_attr, command=lambda: self.toggle_column(self.boolean_variable_internal_attr, 12, "Internal Attr"))
+
+        self.boolean_variable_external_attr = tk.BooleanVar()
+        self.boolean_variable_external_attr.set(False)
+        self.menu_columns.add_checkbutton(label="External Attr", variable=self.boolean_variable_external_attr, command=lambda: self.toggle_column(self.boolean_variable_external_attr, 13, "External Attr"))
+
+        self.boolean_variable_header_offset = tk.BooleanVar()
+        self.boolean_variable_header_offset.set(False)
+        self.menu_columns.add_checkbutton(label="Header Offset", variable=self.boolean_variable_header_offset, command=lambda: self.toggle_column(self.boolean_variable_header_offset, 14, "Header Offset"))
+
+        self.boolean_variable_crc = tk.BooleanVar()
+        self.boolean_variable_crc.set(False)
+        self.menu_columns.add_checkbutton(label="CRC", variable=self.boolean_variable_crc, command=lambda: self.toggle_column(self.boolean_variable_crc, 15, "CRC"))
+
+        self.boolean_variable_compress_size = tk.BooleanVar()
+        self.boolean_variable_compress_size.set(True)
+        self.menu_columns.add_checkbutton(label="Compress Size", variable=self.boolean_variable_compress_size, command=lambda: self.toggle_column(self.boolean_variable_compress_size, 16, "Compress Size"))
+
+        self.boolean_variable_file_size = tk.BooleanVar()
+        self.boolean_variable_file_size.set(True)
+        self.menu_columns.add_checkbutton(label="File Size", variable=self.boolean_variable_file_size, command=lambda: self.toggle_column(self.boolean_variable_file_size, 17, "File Size"))
+
+        self.boolean_variable_filler = tk.BooleanVar()
+        self.boolean_variable_filler.set(True)
+        self.menu_columns.add_checkbutton(label="Filler", variable=self.boolean_variable_filler, command=lambda: self.toggle_column(self.boolean_variable_filler, 18, "Filler"))
 
         self.menu_view.add_cascade(label="Columns", menu=self.menu_columns)
 
@@ -163,6 +251,17 @@ class Menu(tk.Menu):
     def init_menu_system(self):
         self.menu_system = tk.Menu(self, name="system")
         self.add_cascade(label="System", menu=self.menu_system)
+
+    def toggle_column(self, variable: tk.BooleanVar, index: int, column: str):
+        columns = list(self.parent.widget_treeview["displaycolumns"])
+        if variable.get():
+            columns.insert(index, column)
+            # print("Added '{}' to the shown columns.".format(column))
+        else:
+            columns.pop(columns.index(column))
+            # print("Removed '{}' from the shown columns.".format(column))
+        self.parent.widget_treeview["displaycolumns"] = columns = tuple(columns)
+        # print(columns)
 
 
 class Toolbar(ttk.Frame):
