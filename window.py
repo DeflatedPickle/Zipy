@@ -5,6 +5,7 @@
 import tkinter as tk
 import _tkinter
 from tkinter import ttk
+from tkinter import filedialog
 import idlelib.ToolTip
 import zipfile
 import os
@@ -70,6 +71,7 @@ class Window(tk.Tk):
 
     def open_file(self, file):
         self.clear()
+        self.title("Zipy - {}".format(file.split("/")[-1]))
         try:
             with zipfile.ZipFile(file, "r") as z:
                 previous_folder = ""
@@ -129,6 +131,7 @@ class Menu(tk.Menu):
         self.parent = parent
 
         self.init_menu_application()
+        self.init_menu_file()
         self.init_menu_view()
         self.init_menu_columns()
         self.init_menu_window()
@@ -144,6 +147,13 @@ class Menu(tk.Menu):
         self.menu_application.add_command(label="Exit", command=self.parent.exit_program)
 
         self.add_cascade(label="Application", menu=self.menu_application)
+
+    def init_menu_file(self):
+        self.menu_file = tk.Menu(self)
+
+        self.menu_file.add_command(label="Open", command=lambda: open_file(self.parent))
+
+        self.add_cascade(label="File", menu=self.menu_file)
 
     def init_menu_view(self):
         self.menu_view = tk.Menu(self)
@@ -269,10 +279,15 @@ class Toolbar(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
+        self.columnconfigure(1, weight=1)
 
-        self.widget_button_open = ttk.Button(self, text="Open")
+        self.widget_button_open = ttk.Button(self, text="Open", command=lambda: open_file(self.parent), style="Toolbutton")
         self.widget_button_open.grid(row=0, column=0)
         idlelib.ToolTip.ToolTip(self.widget_button_open, self.widget_button_open["text"])
+
+        self.widget_button_exit = ttk.Button(self, text="Exit", command=self.parent.exit_program, style="Toolbutton")
+        self.widget_button_exit.grid(row=0, column=1, sticky="e")
+        idlelib.ToolTip.ToolTip(self.widget_button_exit, self.widget_button_exit["text"])
 
 
 class Statusbar(pk.Statusbar):
@@ -284,6 +299,7 @@ class Statusbar(pk.Statusbar):
         self.add_variable(textvariable=self.status_variable)
 
         self.bind_widget(self.parent.widget_toolbar.widget_button_open, self.status_variable, "Open an archive", "")
+        self.bind_widget(self.parent.widget_toolbar.widget_button_exit, self.status_variable, "Close the program", "")
 
         self.add_sizegrip()
 
@@ -351,9 +367,16 @@ class Treeview(ttk.Treeview):
         self.column("#19", width=1)
 
 
+def open_file(program):
+    file = filedialog.askopenfile()
+    if file is None:
+        return
+    program.open_file(file.name)
+    file.close()
+
+
 def main():
     app = Window()
-    app.open_file(r"C:\Users\PabloPatato\Documents\GitHub\Zipy\test.zip")
     app.mainloop()
 
 
