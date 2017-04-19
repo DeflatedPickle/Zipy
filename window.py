@@ -5,6 +5,7 @@
 import tkinter as tk
 import _tkinter
 from tkinter import ttk
+import idlelib.ToolTip
 import zipfile
 import os
 
@@ -269,13 +270,20 @@ class Toolbar(ttk.Frame):
         ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
+        self.widget_button_open = ttk.Button(self, text="Open")
+        self.widget_button_open.grid(row=0, column=0)
+        idlelib.ToolTip.ToolTip(self.widget_button_open, self.widget_button_open["text"])
+
 
 class Statusbar(pk.Statusbar):
     def __init__(self, parent, *args, **kwargs):
         pk.Statusbar.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
 
         self.status_variable = tk.StringVar()
         self.add_variable(textvariable=self.status_variable)
+
+        self.bind_widget(self.parent.widget_toolbar.widget_button_open, self.status_variable, "Open an archive", "")
 
         self.add_sizegrip()
 
