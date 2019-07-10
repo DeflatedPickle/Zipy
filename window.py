@@ -6,7 +6,7 @@ import tkinter as tk
 import _tkinter
 from tkinter import ttk
 from tkinter import filedialog
-import idlelib.ToolTip
+from idlelib.tooltip import Hovertip
 import zipfile
 import os
 
@@ -171,7 +171,7 @@ class Menu(tk.Menu):
         # for item in self.parent.widget_treeview["columns"]:
         #     self.menu_columns.add_checkbutton(label=item, variable=tk.BooleanVar())
 
-        # TO DO: Replace menu items below with a for loop to save lines.
+        # TODO: Replace menu items below with a for loop to save lines.
         self.boolean_variable_file_extension = tk.BooleanVar()
         self.boolean_variable_file_extension.set(True)
         self.menu_columns.add_checkbutton(label="File Extension", variable=self.boolean_variable_file_extension, command=lambda: self.toggle_column(self.boolean_variable_file_extension, 0, "File Extension"))
@@ -194,7 +194,7 @@ class Menu(tk.Menu):
 
         self.boolean_variable_extra = tk.BooleanVar()
         self.boolean_variable_extra.set(False)
-        self.menu_columns.add_checkbutton(label="Comment", variable=self.boolean_variable_extra, command=lambda: self.toggle_column(self.boolean_variable_extra, 5, "Extra"))
+        self.menu_columns.add_checkbutton(label="Extra", variable=self.boolean_variable_extra, command=lambda: self.toggle_column(self.boolean_variable_extra, 5, "Extra"))
 
         self.boolean_variable_create_system = tk.BooleanVar()
         self.boolean_variable_create_system.set(False)
@@ -283,11 +283,11 @@ class Toolbar(ttk.Frame):
 
         self.widget_button_open = ttk.Button(self, text="Open", command=lambda: open_file(self.parent), style="Toolbutton")
         self.widget_button_open.grid(row=0, column=0)
-        idlelib.ToolTip.ToolTip(self.widget_button_open, self.widget_button_open["text"])
+        Hovertip(self.widget_button_open, self.widget_button_open["text"])
 
         self.widget_button_exit = ttk.Button(self, text="Exit", command=self.parent.exit_program, style="Toolbutton")
         self.widget_button_exit.grid(row=0, column=1, sticky="e")
-        idlelib.ToolTip.ToolTip(self.widget_button_exit, self.widget_button_exit["text"])
+        Hovertip(self.widget_button_exit, self.widget_button_exit["text"])
 
 
 class Statusbar(pk.Statusbar):
